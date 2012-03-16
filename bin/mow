@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+# std libs
+import os
+import sys
+import logging
+import argparse
+import traceback
+
+# mow libs
+from mow import tasks
+from mow import loadMowfile
+from mow import findMowFiles
+from mow import INTERNAL_TASKS
+
+def getParser():
+    """
+    getParser()
+    Builds and returns an ArguementParser
+    """
+    parser = argparse.ArgumentParser(description='Mow')
+    parser.add_argument('task', help='Task name')
+    parser.add_argument('-l', '--logging-level', default='DEBUG')
+    parser.add_argument('-C', '--directory', default=os.getcwd())
+    return parser
+# end def getParser
+
+def parseArgs(args):
+    """
+    parseArgs(args)
+    parses the left over args and converts them to kwargs to be passed
+    to tasks.
+    """
+    func_args = []
+    func_kwargs = {}
+    
+    for arg in args:
+        if arg.startswith('--'):
+            arg = arg.replace('-', '')
+            key, eq, value = arg.partition('=')
+            if not value:
+                func_kwargs[key] = True
+            else:
+                func_kwargs[key] = value
+            # end if
+        else:
+            func_args.append(arg)
+        # end if
+    # end for            
+    return func_args, func_kwargs
+# end def parseArgs
+
+def main():
+    """
+    main()
+    main function for loading a Mowfile and executing a task.
+    """
+    parser = getParser()
+    # parse the args the are defined.
+    known_args, unknown_args = parser.parse_known_args()
+    # parse the args that aren't defined.
+    args, kwargs = parseArgs(unknown_args)
+    
+    try:
+        loadMowfile(known_args.directory)
+    except Exception as exp:
+        print('Error Loading Mowfile:')
+        print()
+        traceback.print_exc()
+        return 1
+    # end try
+    
+    task = INTERNAL_TASKS.get(known_args.task) or tasks.get(known_args.task)
+    if not task:
+        print('Task not found: %s' % (known_args.task))
+        return 1
+    else:
+        try:
+            task(*args, **kwargs)
+            return 0
+        except Exception as exp:
+            print('Task Error:')
+            print()
+            traceback.print_exc()
+            print()
+            print('Help:')
+            INTERNAL_TASKS['help'](known_args.task)
+            return 1
+        # end if
+    # end if
+# end def main
+
+if __name__ == '__main__':
+   sys.exit(main())
+# end if
