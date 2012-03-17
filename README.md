@@ -13,7 +13,6 @@ Creating a task is very easy just add a simple decorator to the  function giving
 
 ####Mowfile:
 
-	:::python
 	from mow import task
 
 	@task('print:hello_world')
@@ -22,7 +21,6 @@ Creating a task is very easy just add a simple decorator to the  function giving
 
 ####Shell command:
 
-	:::bash
 	\> mow print:hello_world
 	
 	
@@ -31,7 +29,6 @@ Creating a task is very easy just add a simple decorator to the  function giving
 ####List:
 Lists out all the currently available tasks.
 	
-	:::bash
 	\> mow list
 	
 	Internal Tasks:
@@ -46,7 +43,6 @@ Lists out all the currently available tasks.
 ####Help:
 Prints out information about a task.
 
-	:::bash
 	\> mow help list
 	
 	Builtin Task
@@ -62,7 +58,6 @@ Prints out information about a task.
 
 ###Mow help
 
-	:::bash
 	\> mow --help
 
 	usage: mow [-h] [-C DIRECTORY] task
