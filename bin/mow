@@ -12,18 +12,6 @@ from mow import loadMowfile
 from mow import findMowFiles
 from mow import INTERNAL_TASKS
 
-def getParser():
-    """
-    getParser()
-    Builds and returns an ArguementParser
-    """
-    parser = argparse.ArgumentParser(description='Mow')
-    parser.add_argument('task', help='Task name')
-    parser.add_argument('-l', '--logging-level', default='DEBUG')
-    parser.add_argument('-C', '--directory', default=os.getcwd())
-    return parser
-# end def getParser
-
 def parseArgs(args):
     """
     parseArgs(args)
@@ -54,7 +42,10 @@ def main():
     main()
     main function for loading a Mowfile and executing a task.
     """
-    parser = getParser()
+    parser = argparse.ArgumentParser(description='Mow')
+    parser.add_argument('task', help='Task name')
+    parser.add_argument('-C', '--directory', default=os.getcwd())
+
     # parse the args the are defined.
     known_args, unknown_args = parser.parse_known_args()
     # parse the args that aren't defined.
@@ -62,9 +53,13 @@ def main():
     
     try:
         loadMowfile(known_args.directory)
+    except RuntimeError as exp:
+        # riased if not file was found
+        print(exp)
+        return 1
     except Exception as exp:
         print('Error Loading Mowfile:')
-        print()
+        print
         traceback.print_exc()
         return 1
     # end try
@@ -79,9 +74,9 @@ def main():
             return 0
         except Exception as exp:
             print('Task Error:')
-            print()
+            print
             traceback.print_exc()
-            print()
+            print
             print('Help:')
             INTERNAL_TASKS['help'](known_args.task)
             return 1

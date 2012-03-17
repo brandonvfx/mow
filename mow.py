@@ -28,11 +28,10 @@ def loadMowfile(path=os.getcwd()):
             break
         #end if 
     # end for
-
     if not file_path:
-        print('Could not find Mowfile. Valid filenames:')
-        print(', '.join(MOW_FILE_NAMES))
-        sys.exit(1)
+        msg = 'Could not find Mowfile. Valid filenames:\n' + \
+              ', '.join(MOW_FILE_NAMES)
+        raise RuntimeError(msg)
     # end if 
 
     # load Mowfile
@@ -100,7 +99,7 @@ def task(name, author=None, version=(0,1,0), help='usage: %prog %name'):
         if name and (':' not in name or name.startswith(':')):
             print('Function: %s' % func.__name__)
             print('File: %s:%s' % (func.__code__.co_filename, func.__code__.co_firstlineno))
-            print()
+            print
             raise RuntimeError("'%s' - Task name must be namespaced." % (name))
         # end if
 
@@ -110,10 +109,7 @@ def task(name, author=None, version=(0,1,0), help='usage: %prog %name'):
         func._version = version
         func._help = help 
         func._description = func.__doc__ or ''
-        # This shouldn't happen anyways since INTERNAL_TASKS don't have namespaces
-        # and everything using ths decorator requires a namespace.
-        if name in INTERNAL_TASKS:
-            raise RuntimeError('You can not overload internal tasks')
+
         # store for quick lookup.
         tasks[name] = func
         # end if
@@ -140,7 +136,7 @@ def list_tasks(namespace=None):
             print('%-25s: %s' % (task_name, task._description.strip()))
         # end def for
     # end if
-    print()
+    print
     print('Loaded Tasks:')
     print('-'*75)
     for task_name in sorted(tasks):
@@ -175,7 +171,7 @@ def print_task_help(task_name):
         print('File: %s:%d' % (task.__code__.co_filename, task.__code__.co_firstlineno))
         print('Function: %s' % (task.__name__))
         print('Description: %s' % (task._description.strip()))
-        print()
+        print
         print(task._help.replace('%prog', 'mow').replace('%name', task._name))
         return
     # end if
