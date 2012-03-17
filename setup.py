@@ -5,11 +5,15 @@ except ImportError:
 
 setup(
     name='Mow',
-    version='0.1.0',
+    version='0.1.1',
     author='Brandon Ashworth',
     author_email='brandon@brandonashworth.com',
     py_modules=['mow'],
-    scripts=['bin/mow'],
+    entry_points = {
+        'console_scripts': [
+            'mow = mow:main'
+        ]
+    },
     url='https://github.com/brandonvfx/mow',
     license='LICENSE.txt',
     description='Simple tool/framework for automating tasks.',

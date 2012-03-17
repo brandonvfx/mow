@@ -9,13 +9,13 @@ sys.path.insert(0, '..')
 import mow
 
 
-def mk_mowfile(file_path):
+def mk_mowfile(file_path, new_code=None):
     code = [
         'import mow\n', '\n', "@mow.task('test:task')\n", 
         'def test_task():\n','    print "hello"\n'
     ]
     fd = open(file_path, 'w')
-    fd.writelines(code)
+    fd.writelines(new_code or code)
     fd.close()
 # end def mk_test_file
 
@@ -63,7 +63,7 @@ class TestLoadMowfile(unittest.TestCase):
 
 class TestTask(unittest.TestCase):
     def setUp(self):
-        mow.tasks = {}
+        mow._tasks = {}
     # end def 
 
     def test_task_added(self):
@@ -71,8 +71,7 @@ class TestTask(unittest.TestCase):
         def test_task(*arg, **kwargs):
             pass
         # end def test_task
-
-        self.assertEquals(test_task, mow.tasks['test:test'])
+        self.assertEquals(test_task, mow._tasks['test:test'])
     # end def test_task_added
 
     def test_task_name(self):
@@ -142,5 +141,90 @@ class TestTask(unittest.TestCase):
     # end def test_task_help
 # end class TestTask
 
+class TestParseArgs(unittest.TestCase):
+    def test_args(self):
+        args = ['arg1', 'arg2']
+        self.assertEquals((['arg1', 'arg2'], {}), mow.parseArgs(args))
+    # end def test_args
+        
+    def test_kwargs(self):
+        args = ['arg1', '--test=1']
+        self.assertEquals((['arg1'], {'test': '1'}), mow.parseArgs(args))
+    # end def test_kwargs
+        
+    def test_kwargs_flag(self):
+        args = ['arg1', '--test=1', '--dry-run']
+        self.assertEquals(
+            (['arg1'], {'test':'1', 'dry_run':True}), mow.parseArgs(args)
+        )
+    # end def test_kwargs_flag
+# end class TestParseArgs
+
+class TestMain(unittest.TestCase):
+    def test_missing_Mowfile(self):
+        args = ['list']
+        self.assertEquals(1, mow.main(args))
+    # def main test_argparse
+        
+    def test_bad_Mowfile(self):
+        dirname = tempfile.mkdtemp()
+        testfile = os.path.join(dirname, 'Mowfile')
+        code = [
+            'import mow\n', '\n', "@mow.task('test:task')\n", 
+            'def test_task():\n','    print "hello\n'
+        ]
+        mk_mowfile(testfile, code)
+        args = ['list', '-C', dirname]
+        self.assertEquals(1, mow.main(args))
+        os.unlink(testfile)
+        os.rmdir(dirname)
+    # end def test_bad_Mowfile
+
+    def test_missing_task(self):
+        dirname = tempfile.mkdtemp()
+        testfile = os.path.join(dirname, 'Mowfile')
+        mk_mowfile(testfile)
+        args = ['no_task', '-C', dirname]
+        self.assertEquals(1, mow.main(args))
+        os.unlink(testfile)
+        os.rmdir(dirname)
+    # end def test_missing_task
+
+    def test_task_error(self):
+        dirname = tempfile.mkdtemp()
+        testfile = os.path.join(dirname, 'Mowfile')
+        code = [
+            'import mow\n', '\n', "@mow.task('test:task')\n", 
+            'def test_task():\n','    raise RuntimeError("Error")\n'
+        ]
+        mk_mowfile(testfile, code)
+        args = ['test:task', '-C', dirname]
+        self.assertEquals(1, mow.main(args))
+        os.unlink(testfile)
+        os.rmdir(dirname)
+    # end def test_task_error
+
+    def test_valid_task(self):
+        dirname = tempfile.mkdtemp()
+        testfile = os.path.join(dirname, 'Mowfile')
+        mk_mowfile(testfile)
+        args = ['test:task', '-C', dirname]
+        self.assertEquals(0, mow.main(args))
+        os.unlink(testfile)
+        os.rmdir(dirname)
+    # end def test_valid_task
+
+    def test_valid_internal_task(self):
+        dirname = tempfile.mkdtemp()
+        testfile = os.path.join(dirname, 'Mowfile')
+        mk_mowfile(testfile)
+        args = ['list', '-C', dirname]
+        self.assertEquals(0, mow.main(args))
+        os.unlink(testfile)
+        os.rmdir(dirname)
+    # end def test_valid_internal_task
+# end class TestMain
+
+        
 if __name__ == '__main__':
     unittest.main()

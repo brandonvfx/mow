@@ -4,15 +4,17 @@ import imp
 import sys
 import glob
 import inspect
+import argparse
+import traceback
 
 __all__ = ['task']
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
 # Where all the tasks are sorted for quick lookup.
-tasks = {}
-INTERNAL_TASKS = {}
+_tasks = {}
+__internal_tasks = {}
 
 def loadMowfile(path=os.getcwd()):
     """
@@ -113,12 +115,92 @@ def task(name=None, author=None, version=(0,1,0), help='usage: %prog %name'):
         func._description = func.__doc__ or ''
 
         # store for quick lookup.
-        tasks[name] = func
-        # end if
+        _tasks[name] = func
         return func
     # end def wrapper
     return wrapper
 # end def task
+
+#
+# Commandline 
+#
+#
+
+def parseArgs(args):
+    """                                                                            
+    parseArgs(args)                                                                
+    parses the left over args and converts them to kwargs to be passed             
+    to tasks.                                                                      
+    """
+    func_args = []
+    func_kwargs = {}
+
+    for arg in args:
+        if arg.startswith('--'):
+            arg = arg.replace('--', '')
+            key, eq, value = arg.partition('=')
+            key = key.replace('-', '_')
+            if not value:
+                func_kwargs[key] = True
+            else:
+                func_kwargs[key] = value
+            # end if
+        else:
+            func_args.append(arg)
+        # end if
+    # end for
+    return func_args, func_kwargs
+# end def parseArgs
+
+def main(cmd_args=sys.argv[1:]):
+    """
+    main()
+    main function for loading a Mowfile and executing a task.
+    """
+    parser = argparse.ArgumentParser(description='Mow')
+    parser.add_argument('task', help='Task name')
+    parser.add_argument('-C', '--directory', default=os.getcwd(),
+                        help = 'Directory to find the Mowfile. Default: Current di\
+rectory.')
+
+    # parse the args the are defined.
+    known_args, unknown_args = parser.parse_known_args(cmd_args)
+    # parse the args that aren't defined.
+    args, kwargs = parseArgs(unknown_args)
+
+    try:
+        loadMowfile(known_args.directory)
+    except RuntimeError as exp:
+        # raised if not file was found
+        print(exp)
+        return 1
+    except Exception as exp:
+        print('Error Loading Mowfile:')
+        print
+        traceback.print_exc(file=sys.stdout)
+        return 1
+    # end try
+
+    task = __internal_tasks.get(known_args.task) or _tasks.get(known_args.task)
+    if not task:
+        print('Task not found: %s' % (known_args.task))
+        return 1
+    else:
+        try:
+            task(*args, **kwargs)
+            return 0
+        except Exception as exp:
+            print('Task Error:')
+            print
+            traceback.print_exc(file=sys.stdout)
+            print
+            print('Help:')
+            __internal_tasks['help'](known_args.task)
+            return 1
+        # end if
+    # end if
+# end def main
+
 
 #
 # Tasks
@@ -133,19 +215,19 @@ def list_tasks(namespace=None):
     if not namespace:
         print('Internal Tasks:')
         print('-'*75)
-        for task_name in sorted(INTERNAL_TASKS):
-            task = INTERNAL_TASKS[task_name]
+        for task_name in sorted(__internal_tasks):
+            task = __internal_tasks[task_name]
             print('%-25s: %s' % (task_name, task._description.strip()))
         # end def for
     # end if
     print
     print('Loaded Tasks:')
     print('-'*75)
-    for task_name in sorted(tasks):
+    for task_name in sorted(_tasks):
         if namespace and not task_name.startswith(namespace):
             continue
         # end if
-        task = tasks[task_name]
+        task = _tasks[task_name]
         print('%-25s: %s' % (task_name, task._description.strip()))
     # end def for
     print('-'*75)
@@ -156,16 +238,16 @@ list_tasks._author = 'brandonvfx'
 list_tasks._version = (0,1,0)
 list_tasks._help = 'usage: %prog %name [namespace]'
 list_tasks._description = list_tasks.__doc__ or ''
-INTERNAL_TASKS['list'] = list_tasks
+__internal_tasks['list'] = list_tasks
 
 def print_task_help(task_name):
     """
     Get help for a task.
     """
-    task = INTERNAL_TASKS.get(task_name) or tasks.get(task_name)
+    task = __internal_tasks.get(task_name) or _tasks.get(task_name)
     if task:
         if getattr(task, '__internal', False):
-            print('Builtin Task')
+            print('Built-in Task')
         # end if
         print('Name: %s' % (task._name))
         print('Author: %s' % (task._author))
@@ -185,5 +267,5 @@ print_task_help._author = 'brandonvfx'
 print_task_help._version = (0,1,0)
 print_task_help._help = 'usage: %prog %name task'
 print_task_help._description = print_task_help.__doc__ or ''
-INTERNAL_TASKS['help'] = print_task_help
+__internal_tasks['help'] = print_task_help
     
