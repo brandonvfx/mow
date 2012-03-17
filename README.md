@@ -6,10 +6,10 @@
 
 
 ## Mowfiles
-Mowfiles are where tasks are defined or loaded using standard python syntax. They can be names one of the following names mowfile, Mowfile, mowfile.py, or Mowfile.py . They should live in your 
+Mowfiles are where tasks are defined or loaded; they can be names one of the following names mowfile, Mowfile, mowfile.py, or Mowfile.py .
 
 ## Creating a Task
-Creating a task is very easy just add a simple decorator to the  function giving it a name and namespace. 
+Creating a task is very easy just add a simple decorator to the function giving it a name and namespace. 
 
 ####Mowfile:
 
@@ -18,15 +18,21 @@ Creating a task is very easy just add a simple decorator to the  function giving
 	@task('print:hello_world')
 	def hello_world(*args, **kwargs):
 		print 'Hello, World.)
+		
+	@task()
+	def db__migrate(*args, **kwargs):
+		print "Migrating"
 
 ####Shell command:
 
 	\> mow print:hello_world
 	
+	\> mow db:migrate
+	
 	
 ## Built-in tasks
 
-####List:
+####list:
 Lists out all the currently available tasks.
 	
 	\> mow list
@@ -40,7 +46,7 @@ Lists out all the currently available tasks.
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	
-####Help:
+####help:
 Prints out information about a task.
 
 	\> mow help list
@@ -96,7 +102,7 @@ Prints out information about a task.
 	Translates to:
 	db_migrate(*('production',), **{'host':'test_db'})
 	
-There is no type casting do before these values are passed to the task function so they will all me string. There is only one case where this is not true, for an option without a value it is assumed to be a bool flags and its value will automatically be set to **True**
+There is no type casting is done before these values are passed to the task function so they will all be strings. There is only one case where this is not true, for an option without a value it is assumed to be a bool flags and its value will automatically be set to **True**
 
 	/> mow db:migrate production --host=test_db --dry-run
 	
