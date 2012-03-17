@@ -6,6 +6,7 @@ import glob
 import inspect
 
 __all__ = ['task']
+__version__ = '0.1.0'
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
