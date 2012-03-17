@@ -79,7 +79,7 @@ def findMowFiles(paths=os.getenv('MOW_PATH', '')):
     # end for
 # end def findMowFiles
 
-def task(name, author=None, version=(0,1,0), help='usage: %prog %name'):
+def task(name=None, author=None, version=(0,1,0), help='usage: %prog %name'):
     """
     task(name, author=None, version=(0,1,0), help='usage: %prog %name')
     
@@ -96,15 +96,16 @@ def task(name, author=None, version=(0,1,0), help='usage: %prog %name'):
     """
     def wrapper(func):
         # Tasks that are not part of mow are required to have a namespace.
-        if name and (':' not in name or name.startswith(':')):
-            print('Function: %s' % func.__name__)
-            print('File: %s:%s' % (func.__code__.co_filename, func.__code__.co_firstlineno))
-            print
-            raise RuntimeError("'%s' - Task name must be namespaced." % (name))
+        task_name = name or func.__name__.replace('__', ':')
+        if task_name and ':' not in task_name:
+            msg = 'Function: %s\n' % func.__name__
+            msg += 'File: %s:%s\n' % (func.__code__.co_filename, func.__code__.co_firstlineno)
+            msg += "'%s' - Task name must be namespaced." % (task_name)
+            raise RuntimeError(msg)
         # end if
 
         # store the descriptive information
-        func._name = name
+        func._name = task_name
         func._author = author
         func._version = version
         func._help = help 

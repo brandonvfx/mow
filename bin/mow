@@ -44,7 +44,8 @@ def main():
     """
     parser = argparse.ArgumentParser(description='Mow')
     parser.add_argument('task', help='Task name')
-    parser.add_argument('-C', '--directory', default=os.getcwd())
+    parser.add_argument('-C', '--directory', default=os.getcwd(), 
+                        help = 'Directory to find the Mowfile. Default: Current directory.')
 
     # parse the args the are defined.
     known_args, unknown_args = parser.parse_known_args()

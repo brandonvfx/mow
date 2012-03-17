@@ -84,6 +84,15 @@ class TestTask(unittest.TestCase):
         self.assertEquals(test_task._name, 'test:test')
     # end def test_task_name
 
+    def test_task_name(self):
+        @mow.task()
+        def test__task(*arg, **kwargs):
+            pass
+        # end def test_task
+
+        self.assertEquals(test__task._name, 'test:task')
+    # end def test_task_name
+
     def test_task_no_namepsace(self):
         dec = mow.task('test')
 
