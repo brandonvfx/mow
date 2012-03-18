@@ -67,6 +67,7 @@ def loadMowfile(path=os.getcwd()):
             code = compile(file.read(), file_path, 'exec')
         # end with 
         exec(code, mod.__dict__)
+        globals()['mowfile'] = mod
     # end if
 
     # revert sys.path
