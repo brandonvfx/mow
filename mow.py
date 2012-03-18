@@ -218,6 +218,7 @@ rectory.')
             return 0
         except Exception as exp:
             __logger.exception('Task Error:')
+            print('For help type: mow help %s' % known_args.task)
             return 1
         # end if
     # end if
@@ -261,7 +262,7 @@ list_tasks._usage = 'mow list [namespace]'
 list_tasks._description = list_tasks.__doc__ or ''
 __internal_tasks['list'] = list_tasks
 
-def print_task_help(task_name):
+def print_task_help(task_name, extended=False):
     """
     Get help for a task.
     """
@@ -273,10 +274,12 @@ def print_task_help(task_name):
         print('Name: %s' % (task._name))
         print('Usage:\n    %s' % (task._usage))
         print('Description: %s' % (task._description.strip()))
-        print('Author: %s' % (task._author))
-        print('Version: %d.%d.%d' % (task._version))
-        print('File: %s:%d' % (task.__code__.co_filename, task.__code__.co_firstlineno))
-        print('Function: %s' % (task.__name__))
+        if extended:
+            print('Author: %s' % (task._author))
+            print('Version: %d.%d.%d' % (task._version))
+            print('File: %s:%d' % (task.__code__.co_filename, task.__code__.co_firstlineno))
+            print('Function: %s' % (task.__name__))
+        # end if
         return
     # end if
     print('Task not found: %s' % (task_name))

@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Mow** is a lightweight Make/Rake alternative. It allows developers to turn python functions into a command line tools.
+**Mow** is a lightweight Makefile/Rakefile alternative. It allows developers to turn python functions into a command line tools.
 
 ##Example
 
@@ -45,17 +45,22 @@ Lists out all the currently available tasks.
 Prints out information about a task.
 
 	\> mow help list
-	
-	Builtin Task
+	Built-in Task
 	Name: list
+	Usage:
+	    mow list [namespace]
+	Description: List all available tasks.
+	
+	\> mow help list --extended
+	Built-in Task
+	Name: list
+	Usage:
+    	mow list [namespace]
+	Description: List all available tasks.
 	Author: brandonvfx
 	Version: 0.1.0
-	File: mow.py:127
+	File: mow.py:234
 	Function: list_tasks
-	Description: List all available tasks.
-
-	usage: mow list [namespace]
-	
 
 ###Mow help
 
