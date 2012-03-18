@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Mow** allows for you to turn python function into command line tool. It is based on ideas from Rake.
+**Mow** allows for you to turn python functions into command line tools. It is based on ideas from Rake.
 
 
 ## Mowfiles
@@ -11,7 +11,7 @@ Mowfiles are where tasks are defined or loaded; they can be names one of the fol
 ## Creating a Task
 Creating a task is very easy just add a simple decorator to the function giving it a name and namespace. 
 
-####Mowfile:
+####Tasks:
 
 	from mow import task
 
@@ -23,7 +23,7 @@ Creating a task is very easy just add a simple decorator to the function giving 
 	def db__migrate(*args, **kwargs):
 		print "Migrating"
 
-####Shell command:
+####Shell commands:
 
 	\> mow print:hello_world
 	
