@@ -1,2 +1,2 @@
 #!/bin/sh
-find . -name "*.pyc" -delete && nosetests --with-coverage -v --cover-package="mow"
+find . -name "*.pyc" -delete && nosetests --with-coverage -v --cover-package="mow" $*

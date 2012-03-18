@@ -2,33 +2,28 @@
 
 ## Overview
 
-**Mow** allows for you to turn python functions into command line tools. It is based on ideas from Rake.
+**Mow** is a lightweight Make/Rake alternative. It allows a developer to turn python functions into a command line tools.
 
+##Example
 
-## Mowfiles
-Mowfiles are where tasks are defined or loaded; they can be names one of the following names mowfile, Mowfile, mowfile.py, or Mowfile.py .
-
-## Creating a Task
-Creating a task is very easy just add a simple decorator to the function giving it a name and namespace. 
-
-####Tasks:
+####Task defined in Mowfile:
 
 	from mow import task
 
-	@task('print:hello_world')
-	def hello_world(*args, **kwargs):
-		print 'Hello, World.)
-		
 	@task()
-	def db__migrate(*args, **kwargs):
-		print "Migrating"
+	def greet(name, greeting='Hello'):
+		print '%s, %s.' % (greeting, name)
 
-####Shell commands:
+####Commandline Usage:
 
-	\> mow print:hello_world
+	\> mow greet Bob
+	Hello, Bob.
 	
-	\> mow db:migrate
+	\> mow greet --greeting="Goodbye" Bob
+	Goodbye, Bob.
 	
+## Mowfiles
+Mowfiles are where tasks are defined or loaded; they can be names one of the following names mowfile, Mowfile, mowfile.py, or Mowfile.py .
 	
 ## Built-in tasks
 
@@ -81,18 +76,18 @@ Prints out information about a task.
                         	
 ## Task Options
 	
-	task(name=None, author=None, version=(0,1,0), help='usage: %prog %name')
-
-	The task decorator that make all this work.
-	The decorated function's docstring is used as the description of the task.
-
-	name (str): the name of the task it must be namespaced. 
-            The namespace separator is ':' If no name is passed the function name 
-            will be used and '__' will be replaced with ':'. ex: db:migrate
-	author (str): just the name or email of the author.
-	version (tuple): 3 int tuple of the version number.
-	help (str): help information for task usage. %prog will be replaced with 'mow'.
-            %name will be replace with the name of the task.
+	task(name, author=None, version=(0,1,0), usage='%prog %name')                              
+                                                                                               
+    The task decorator that make all this work.                                                
+    The decorated function's docstring is used as the description of the task.                 
+                                                                                               
+    name (str): the name of the task, to namespace the task use a colon (':').  ex: db:migrate
+                If no name is given the function name is used and '__' will be converted to ':' 
+                to give it a namespace.                                                                      
+    author (str): just the name or email of the author.                                        
+    version (tuple): 3 int tuple of the version number.                                        
+    usage (str): Usage information. %prog will be replaced with 'mow'.                         
+                 %name will be replace with the name of the task.  
 
 ## Commandline Usage
 **mow** is pretty simple to use, it only has one required argument (task name) and one optional option (-C/--directory). All other arguments and options are passed into the task function as *arg and **kwargs. 

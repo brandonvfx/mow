@@ -19,7 +19,7 @@ __internal_tasks = {}
 
 # Interal Base logger
 __logger = logging.getLogger('Mow')
-__logger.setLevel(logging.INFO)
+__logger.setLevel(logging.WARN)
 
 handler = logging.StreamHandler()
 formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
@@ -97,15 +97,15 @@ def findMowFiles(paths=os.getenv('MOW_PATH', '')):
     # end for
 # end def findMowFiles
 
-def task(name=None, author=None, version=(0,1,0), usage='usage: %prog %name'):
+def task(name=None, author=None, version=(0,1,0), usage='%prog %name'):
     """
-    task(name, author=None, version=(0,1,0), help='usage: %prog %name')
+    task(name, author=None, version=(0,1,0), usage='%prog %name')
     
     The task decorator that make all this work.
     The decorated function's docstring is used as the description of the task.
     
-    name (str): the name of the task it must be namespaced. 
-                The namespace separator is ':' . ex: db:migrate
+    name (str): the name of the task, to namespace the task use a colon (':').  ex: db:migrate
+                If no name is given the function name is used and '__' will be converted to ':' to give it a namespace.
     author (str): just the name or email of the author.
     version (tuple): 3 int tuple of the version number.
     usage (str): Usage information. %prog will be replaced with 'mow'.
@@ -113,25 +113,25 @@ def task(name=None, author=None, version=(0,1,0), usage='usage: %prog %name'):
 
     """
     def wrapper(func):
-        # Tasks that are not part of mow are required to have a namespace.
-        task_name = name or func.__name__.replace('__', ':')
-        if task_name and (':' not in task_name or task_name.startswith(':')):
-            msg = 'Function: %s\n' % func.__name__
-            msg += 'File: %s:%s\n' % (func.__code__.co_filename, func.__code__.co_firstlineno)
-            msg += "'%s' - Task name must be namespaced." % (task_name)
-            raise RuntimeError(msg)
-        # end if
-
         # store the descriptive information
-        func._name = task_name
+        func._name = name or func.__name__.replace('__', ':')
         func._author = author
         func._version = version
-        func._usage = usage.replace('%prog', 'mow').replace('%name', task_name)
+        func._usage = usage.replace('%prog', 'mow').replace('%name', func._name)
         func._description = func.__doc__ or ''
 
+        if func._name in __internal_tasks:
+            raise RuntimeError("'%s' is the name of a built-in task, please rename your task" % (func._name))
+        # end if
+        
+        if func._name in _tasks:
+            __logger.warn("Task '%s' replaces another task with the same name" %(func._name))
+        # end if
+
         # store for quick lookup.
-        _tasks[name] = func
-        __logger.debug("Added function '%s' as task '%s'", name, func.__name__)
+        _tasks[func._name] = func
+        __logger.debug("Added function '%s:%s' as task '%s'", 
+                       func.__code__.co_filename, func.__name__, name)
         return func
     # end def wrapper
     return wrapper
@@ -175,6 +175,8 @@ def main(cmd_args=sys.argv[1:]):
     """
     parser = argparse.ArgumentParser(description='Mow')
     parser.add_argument('task', help='Task name')
+    parser.add_argument('-v', dest='verbose', action='count', default=0, 
+                        help = 'Prints outs more info. -v = info, -vv = debug')
     parser.add_argument('-C', '--directory', default=os.getcwd(),
                         help = 'Directory to find the Mowfile. Default: Current di\
 rectory.')
@@ -183,6 +185,13 @@ rectory.')
     known_args, unknown_args = parser.parse_known_args(cmd_args)
     # parse the args that aren't defined.
     args, kwargs = parseArgs(unknown_args)
+    if known_args.verbose == 1:
+        __logger.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
+    elif known_args.verbose == 2:
+        __logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
+    # end if
 
     try:
         loadMowfile(known_args.directory)
@@ -225,7 +234,6 @@ def list_tasks(namespace=None):
     """
     List all available tasks.
     """
-    logger.info('Testing')
     if not namespace:
         print('Built-in Tasks:')
         print('-'*75)
