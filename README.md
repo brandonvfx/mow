@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Mow** is a lightweight Make/Rake alternative. It allows a developer to turn python functions into a command line tools.
+**Mow** is a lightweight Make/Rake alternative. It allows developers to turn python functions into a command line tools.
 
 ##Example
 
