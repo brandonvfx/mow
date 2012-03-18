@@ -23,7 +23,7 @@
 	Goodbye, Bob.
 	
 ## Mowfiles
-Mowfiles are where tasks are defined or loaded; they can be names one of the following names mowfile, Mowfile, mowfile.py, or Mowfile.py .
+Mowfiles are where tasks are defined or loaded. The mowfile most have one of the following names: mowfile, Mowfile, mowfile.py, or Mowfile.py .
 	
 ## Built-in tasks
 
