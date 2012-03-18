@@ -1,12 +1,14 @@
 import os
 import sys
-import StringIO
+import logging
 import tempfile
 import unittest
 
 sys.path.insert(0, '..')
 
 import mow
+
+mow.__logger.setLevel(logging.FATAL)
 
 
 def mk_mowfile(file_path, new_code=None):
@@ -130,15 +132,15 @@ class TestTask(unittest.TestCase):
         self.assertEquals(test_task._description, "DESCRIPTION")
     # end def test_task_description
 
-    def test_task_help(self):
-        @mow.task('test:test', help='help')
+    def test_task_usage(self):
+        @mow.task('test:test', usage='%prog %name usage')
         def test_task(*arg, **kwargs):
             """DESCRIPTION"""
             pass
         # end def test_task
 
-        self.assertEquals(test_task._help, 'help')
-    # end def test_task_help
+        self.assertEquals(test_task._usage, 'mow test:test usage')
+    # end def test_task_usage
 # end class TestTask
 
 class TestParseArgs(unittest.TestCase):

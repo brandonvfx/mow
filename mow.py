@@ -4,6 +4,7 @@ import imp
 import sys
 import glob
 import inspect
+import logging
 import argparse
 import traceback
 
@@ -12,9 +13,21 @@ __version__ = '0.1.1'
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
-# Where all the tasks are sorted for quick lookup.
+# Where all the tasks are stored for quick lookup.
 _tasks = {}
 __internal_tasks = {}
+
+# Interal Base logger
+__logger = logging.getLogger('Mow')
+__logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler()
+formatter = logging.Formatter('[%(levelname)s] %(name)s: %(message)s')
+handler.setFormatter(formatter)
+__logger.addHandler(handler)
+
+# logger to be used elsewhere
+logger = __logger.getChild('task')
 
 def loadMowfile(path=os.getcwd()):
     """
@@ -28,13 +41,12 @@ def loadMowfile(path=os.getcwd()):
         tmp_path = os.path.join(os.path.abspath(path), mowfile)
         if os.path.exists(tmp_path) and os.path.isfile(tmp_path):
             file_path = tmp_path
+            __logger.debug('Found Mowfile: %s', file_path)
             break
         #end if 
     # end for
     if not file_path:
-        msg = 'Could not find Mowfile. Valid filenames:\n' + \
-              ', '.join(MOW_FILE_NAMES)
-        raise RuntimeError(msg)
+        raise RuntimeError
     # end if 
 
     # load Mowfile
@@ -45,10 +57,12 @@ def loadMowfile(path=os.getcwd()):
     if file_path.endswith('.py'):
         # Use the standard import mechanism.
         module_name, ext = os.path.splitext(os.path.basename(file_path))
+        __logger.debug('Importing Mowfile...')
         mod = __import__(module_name)
     else:
         # some magic to load Mowfile that don't end in .py
         mod = imp.new_module('mowfile')
+        __logger.debug('Reading Mowfile...')
         with open(file_path) as file:
             code = compile(file.read(), file_path, 'exec')
         # end with 
@@ -59,6 +73,7 @@ def loadMowfile(path=os.getcwd()):
     sys.path.pop(0)
     
     # mainly for testing.
+    __logger.debug('Mowfile loaded.')
     return mod
 # end loadMowfile    
         
@@ -82,7 +97,7 @@ def findMowFiles(paths=os.getenv('MOW_PATH', '')):
     # end for
 # end def findMowFiles
 
-def task(name=None, author=None, version=(0,1,0), help='usage: %prog %name'):
+def task(name=None, author=None, version=(0,1,0), usage='usage: %prog %name'):
     """
     task(name, author=None, version=(0,1,0), help='usage: %prog %name')
     
@@ -93,14 +108,14 @@ def task(name=None, author=None, version=(0,1,0), help='usage: %prog %name'):
                 The namespace separator is ':' . ex: db:migrate
     author (str): just the name or email of the author.
     version (tuple): 3 int tuple of the version number.
-    help (str): help information for task usage. %prog will be replaced with 'mow'.
+    usage (str): Usage information. %prog will be replaced with 'mow'.
                 %name will be replace with the name of the task.
 
     """
     def wrapper(func):
         # Tasks that are not part of mow are required to have a namespace.
         task_name = name or func.__name__.replace('__', ':')
-        if task_name and ':' not in task_name:
+        if task_name and (':' not in task_name or task_name.startswith(':')):
             msg = 'Function: %s\n' % func.__name__
             msg += 'File: %s:%s\n' % (func.__code__.co_filename, func.__code__.co_firstlineno)
             msg += "'%s' - Task name must be namespaced." % (task_name)
@@ -111,11 +126,12 @@ def task(name=None, author=None, version=(0,1,0), help='usage: %prog %name'):
         func._name = task_name
         func._author = author
         func._version = version
-        func._help = help 
+        func._usage = usage.replace('%prog', 'mow').replace('%name', task_name)
         func._description = func.__doc__ or ''
 
         # store for quick lookup.
         _tasks[name] = func
+        __logger.debug("Added function '%s' as task '%s'", name, func.__name__)
         return func
     # end def wrapper
     return wrapper
@@ -172,30 +188,27 @@ rectory.')
         loadMowfile(known_args.directory)
     except RuntimeError as exp:
         # raised if not file was found
-        print(exp)
+        msg = "Could not find Mowfile in '%s'.\nValid filenames: " % (known_args.directory) + \
+              ', '.join(MOW_FILE_NAMES)
+        __logger.error(msg)
         return 1
     except Exception as exp:
-        print('Error Loading Mowfile:')
-        print
-        traceback.print_exc(file=sys.stdout)
+        __logger.exception('Error Loading Mowfile:')
         return 1
     # end try
 
     task = __internal_tasks.get(known_args.task) or _tasks.get(known_args.task)
     if not task:
-        print('Task not found: %s' % (known_args.task))
+        __logger.error('Task not found: %s', known_args.task)
         return 1
     else:
         try:
+            __logger.debug("Executing task '%s'", known_args.task)
             task(*args, **kwargs)
+            __logger.debug('Task complete.')
             return 0
         except Exception as exp:
-            print('Task Error:')
-            print
-            traceback.print_exc(file=sys.stdout)
-            print
-            print('Help:')
-            __internal_tasks['help'](known_args.task)
+            __logger.exception('Task Error:')
             return 1
         # end if
     # end if
@@ -212,16 +225,16 @@ def list_tasks(namespace=None):
     """
     List all available tasks.
     """
+    logger.info('Testing')
     if not namespace:
-        print('Internal Tasks:')
+        print('Built-in Tasks:')
         print('-'*75)
         for task_name in sorted(__internal_tasks):
             task = __internal_tasks[task_name]
             print('%-25s: %s' % (task_name, task._description.strip()))
         # end def for
     # end if
-    print
-    print('Loaded Tasks:')
+    print('\nLoaded Tasks:')
     print('-'*75)
     for task_name in sorted(_tasks):
         if namespace and not task_name.startswith(namespace):
@@ -236,7 +249,7 @@ list_tasks.__internal = True
 list_tasks._name = 'list'
 list_tasks._author = 'brandonvfx'
 list_tasks._version = (0,1,0)
-list_tasks._help = 'usage: %prog %name [namespace]'
+list_tasks._usage = 'mow list [namespace]'
 list_tasks._description = list_tasks.__doc__ or ''
 __internal_tasks['list'] = list_tasks
 
@@ -250,13 +263,12 @@ def print_task_help(task_name):
             print('Built-in Task')
         # end if
         print('Name: %s' % (task._name))
+        print('Usage:\n    %s' % (task._usage))
+        print('Description: %s' % (task._description.strip()))
         print('Author: %s' % (task._author))
         print('Version: %d.%d.%d' % (task._version))
         print('File: %s:%d' % (task.__code__.co_filename, task.__code__.co_firstlineno))
         print('Function: %s' % (task.__name__))
-        print('Description: %s' % (task._description.strip()))
-        print
-        print(task._help.replace('%prog', 'mow').replace('%name', task._name))
         return
     # end if
     print('Task not found: %s' % (task_name))
@@ -265,7 +277,7 @@ print_task_help.__internal = True
 print_task_help._name = 'help'
 print_task_help._author = 'brandonvfx'
 print_task_help._version = (0,1,0)
-print_task_help._help = 'usage: %prog %name task'
+print_task_help._usage = 'mow help task'
 print_task_help._description = print_task_help.__doc__ or ''
 __internal_tasks['help'] = print_task_help
     
