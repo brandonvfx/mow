@@ -9,7 +9,7 @@ import argparse
 import traceback
 
 __all__ = ['task']
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
@@ -247,7 +247,7 @@ def list_tasks(namespace=None):
     print('\nLoaded Tasks:')
     print('-'*75)
     for task_name in sorted(_tasks):
-        if namespace and not task_name.startswith(namespace):
+        if namespace and not task_name.startswith(namespace+":"):
             continue
         # end if
         task = _tasks[task_name]
