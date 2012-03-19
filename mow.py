@@ -102,7 +102,7 @@ def task(name=None, author=None, version=(0,1,0), usage='%prog %name'):
     """
     task(name=None, author=None, version=(0,1,0), usage='%prog %name')
     
-    The task decorator that make all this work.
+    The task decorator that makes all this work.
     The decorated function's docstring is used as the description of the task.
     
     name (str): the name of the task, to namespace the task use a colon (':').  ex: db:migrate

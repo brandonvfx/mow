@@ -23,26 +23,39 @@
 	Goodbye, Bob.
 	
 ## Mowfiles
-Mowfiles are where tasks are defined or loaded. The mowfile most have one of the following names: mowfile, Mowfile, mowfile.py, or Mowfile.py .
+Mowfiles are where tasks are defined or loaded. The mowfile must have one of the following names: 
+
+* mowfile
+* Mowfile
+* mowfile.py
+* Mowfile.py
+
+By default **mow** will search the current directory for the Mowfile but the -C/--directory option can be used to specify another location.
+
 	
 ## Built-in tasks
 
 ####list:
 Lists out all the currently available tasks.
+
+Usage: `mow list [namespace]`
 	
 	\> mow list
 	
-	Internal Tasks:
+	Built-in Tasks:
 	---------------------------------------------------------------------------
 	help                     : Get help for a task.
 	list                     : List all available tasks.
 
 	Loaded Tasks:
 	---------------------------------------------------------------------------
+	test                     : Mow test runner
 	---------------------------------------------------------------------------
 	
 ####help:
 Prints out information about a task.
+
+Usage: `mow help TASK_NAME`
 
 	\> mow help list
 	Built-in Task
@@ -83,7 +96,7 @@ Prints out information about a task.
 	
 	task(name=None, author=None, version=(0,1,0), usage='%prog %name')                              
                                                                                                
-    The task decorator that make all this work.                                                
+    The task decorator that makes all this work.                                                
     The decorated function's docstring is used as the description of the task.                 
                                                                                                
     name (str): the name of the task, to namespace the task use a colon (':').  ex: db:migrate

@@ -4,6 +4,7 @@ from mow import task, logger
 
 @task('test')
 def run_tests(*args, **kwargs):
+    """Mow test runner"""
     logger.info('Starting tests...')
     subprocess.call('nosetests --with-coverage -v --cover-package=mow', 
                     shell=True)
