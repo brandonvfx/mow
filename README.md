@@ -25,10 +25,7 @@
 ## Mowfiles
 Mowfiles are where tasks are defined or loaded. The mowfile must have one of the following names: 
 
-* mowfile
-* Mowfile
-* mowfile.py
-* Mowfile.py
+`mowfile, Mowfile, mowfile.py, or Mowfile.py`
 
 By default **mow** will search the current directory for the Mowfile but the -C/--directory option can be used to specify another location.
 
@@ -75,28 +72,28 @@ Usage: `mow help TASK_NAME`
 	File: mow.py:234
 	Function: list_tasks
 
-###Mow help
+##Mow help
 
 	\> mow --help
 
-	usage: mow [-h] [-C DIRECTORY] task
+	usage: mow [-h] [-v] [-C DIRECTORY] task
 
 	Mow
 	
 	positional arguments:
-  		task                  Task name
-
+	  task                  Task name
+	
 	optional arguments:
-  	  -h, --help            show this help message and exit
-  	  -C DIRECTORY, --directory DIRECTORY
-  	  						Directory to find the Mowfile. Default: Current
-                        	directory.
-                        	
+	  -h, --help            show this help message and exit
+	  -v                    Prints outs more info. -v = info, -vv = debug
+	  -C DIRECTORY, --directory DIRECTORY
+	                        Directory to find the Mowfile. Default: Current
+	                        directory.
+	                        	
 ## Task Options
 	
 	task(name=None, author=None, version=(0,1,0), usage='%prog %name')                              
-                                                                                               
-    The task decorator that makes all this work.                                                
+                                                                                                    
     The decorated function's docstring is used as the description of the task.                 
                                                                                                
     name (str): the name of the task, to namespace the task use a colon (':').  ex: db:migrate
