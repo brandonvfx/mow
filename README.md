@@ -107,14 +107,14 @@ Usage: `mow help TASK_NAME`
 ## Commandline Usage
 **mow** is pretty simple to use, it only has one required argument (task name) and one optional option (-C/--directory). All other arguments and options are passed into the task function as *arg and **kwargs. 
 	
-	/> mow db:migrate production --host=test_db
+	/> mow db:migrate production --host=localhost
 	
 	Translates to:
-	db_migrate(*('production',), **{'host':'test_db'})
+	db_migrate(*('production',), **{'host':'localhost'})
 	
 There is no type casting is done before these values are passed to the task function so they will all be strings. There is only one case where this is not true, for an option without a value it is assumed to be a bool flags and its value will automatically be set to **True**
 
-	/> mow db:migrate production --host=test_db --dry-run
+	/> mow db:migrate production --host=localhost --dry-run
 	
 	Translates to:
-	db_migrate(*('production',), **{'host':'test_db', 'dry-run':True})
+	db_migrate(*('production',), **{'host':'localhost', 'dry_run':True})
