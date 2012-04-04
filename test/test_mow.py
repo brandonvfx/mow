@@ -14,7 +14,7 @@ mow.__logger.setLevel(logging.FATAL)
 def mk_mowfile(file_path, new_code=None):
     code = [
         'import mow\n', '\n', "@mow.task('testing')\n", 
-        'def test_task():\n','    print "hello"\n'
+        'def test_task():\n','    print("hello")\n'
     ]
     fd = open(file_path, 'w')
     fd.writelines(new_code or code)
@@ -187,7 +187,7 @@ class TestMain(unittest.TestCase):
         testfile = os.path.join(dirname, 'Mowfile')
         code = [
             'import mow\n', '\n', "@mow.task('test:task')\n", 
-            'def test_task():\n','    print "hello\n'
+            'def test_task():\n','    print("hello)\n'
         ]
         mk_mowfile(testfile, code)
         args = ['list', '-C', dirname]
