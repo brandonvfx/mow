@@ -45,7 +45,9 @@ class TestLoadMowfile(unittest.TestCase):
             mod = mow.loadMowfile(dirname)
             self.assertNotEqual(None, mod)
             os.unlink(testfile)
-            os.unlink(testfile+'c')
+            if os.path.exists(testfile+'c'):
+                os.unlink(testfile+'c')
+            # end if
             del mod
         # end for
         os.rmdir(dirname)
@@ -59,7 +61,9 @@ class TestLoadMowfile(unittest.TestCase):
         mod = mow.loadMowfile(dirname)
         self.assertNotEqual(None, mod)
         os.unlink(testfile)
-        os.unlink(testfile+'c')
+        if os.path.exists(testfile+'c'):
+            os.unlink(testfile+'c')
+        # end if
         del mod
         os.rmdir(dirname)
     # end def test_load_mowfile_py
@@ -203,7 +207,9 @@ class TestMain(unittest.TestCase):
         args = ['no_task', '-C', dirname]
         self.assertEquals(1, mow.main(args))
         os.unlink(testfile)
-        os.unlink(testfile+'c')
+        if os.path.exists(testfile+'c'):
+            os.unlink(testfile+'c')
+        # end if
         os.listdir(dirname)
         os.rmdir(dirname)
     # end def test_missing_task
@@ -219,7 +225,9 @@ class TestMain(unittest.TestCase):
         args = ['test:task', '-C', dirname]
         self.assertEquals(1, mow.main(args))
         os.unlink(testfile)
-        os.unlink(testfile+'c')
+        if os.path.exists(testfile+'c'):
+            os.unlink(testfile+'c')
+        # end if
         os.rmdir(dirname)
     # end def test_task_error
 
@@ -230,7 +238,9 @@ class TestMain(unittest.TestCase):
         args = ['testing', '-C', dirname]
         self.assertEquals(0, mow.main(args))
         os.unlink(testfile)
-        os.unlink(testfile+'c')
+        if os.path.exists(testfile+'c'):
+            os.unlink(testfile+'c')
+        # end if
         os.rmdir(dirname)
     # end def test_valid_task
 
@@ -241,7 +251,9 @@ class TestMain(unittest.TestCase):
         args = ['list', '-C', dirname]
         self.assertEquals(0, mow.main(args))
         os.unlink(testfile)
-        os.unlink(testfile+'c')
+        if os.path.exists(testfile+'c'):
+            os.unlink(testfile+'c')
+        # end if
         os.rmdir(dirname)
     # end def test_valid_internal_task
 # end class TestMain
