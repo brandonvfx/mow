@@ -45,6 +45,7 @@ class TestLoadMowfile(unittest.TestCase):
             mod = mow.loadMowfile(dirname)
             self.assertNotEqual(None, mod)
             os.unlink(testfile)
+            os.unlink(testfile+'c')
             del mod
         # end for
         os.rmdir(dirname)
@@ -57,9 +58,10 @@ class TestLoadMowfile(unittest.TestCase):
         mk_mowfile(testfile)
         mod = mow.loadMowfile(dirname)
         self.assertNotEqual(None, mod)
-        #os.unlink(testfile)
+        os.unlink(testfile)
+        os.unlink(testfile+'c')
         del mod
-        #os.rmdir(dirname)
+        os.rmdir(dirname)
     # end def test_load_mowfile_py
 # end class TestLoadMowfile
 
@@ -201,6 +203,8 @@ class TestMain(unittest.TestCase):
         args = ['no_task', '-C', dirname]
         self.assertEquals(1, mow.main(args))
         os.unlink(testfile)
+        os.unlink(testfile+'c')
+        os.listdir(dirname)
         os.rmdir(dirname)
     # end def test_missing_task
 
@@ -215,6 +219,7 @@ class TestMain(unittest.TestCase):
         args = ['test:task', '-C', dirname]
         self.assertEquals(1, mow.main(args))
         os.unlink(testfile)
+        os.unlink(testfile+'c')
         os.rmdir(dirname)
     # end def test_task_error
 
@@ -225,6 +230,7 @@ class TestMain(unittest.TestCase):
         args = ['testing', '-C', dirname]
         self.assertEquals(0, mow.main(args))
         os.unlink(testfile)
+        os.unlink(testfile+'c')
         os.rmdir(dirname)
     # end def test_valid_task
 
@@ -235,6 +241,7 @@ class TestMain(unittest.TestCase):
         args = ['list', '-C', dirname]
         self.assertEquals(0, mow.main(args))
         os.unlink(testfile)
+        os.unlink(testfile+'c')
         os.rmdir(dirname)
     # end def test_valid_internal_task
 # end class TestMain

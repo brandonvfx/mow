@@ -54,22 +54,8 @@ def loadMowfile(path=os.getcwd()):
     dir = os.path.dirname(file_path)
     sys.path.insert(0, dir)
 
-    if file_path.endswith('.py'):
-        # Use the standard import mechanism.
-        module_name, ext = os.path.splitext(os.path.basename(file_path))
-        __logger.debug('Importing Mowfile...')
-        mod = __import__(module_name)
-    else:
-        # some magic to load Mowfile that don't end in .py
-        mod = imp.new_module('mowfile')
-        __logger.debug('Reading Mowfile...')
-        with open(file_path) as file:
-            code = compile(file.read(), file_path, 'exec')
-        # end with 
-        exec(code, mod.__dict__)
-        globals()['mowfile'] = mod
-    # end if
-
+    mod = imp.load_source('mowfile', file_path)
+    
     # revert sys.path
     sys.path.pop(0)
     
