@@ -27,7 +27,11 @@ handler.setFormatter(formatter)
 __logger.addHandler(handler)
 
 # logger to be used elsewhere
-logger = __logger.getChild('task')
+try:
+    logger = __logger.getChild('task')
+except AttributeError: 
+    logger = logging.getLogger("Mow.task")
+# end try
 
 def loadMowfile(path=os.getcwd()):
     """
@@ -55,7 +59,7 @@ def loadMowfile(path=os.getcwd()):
     sys.path.insert(0, dir)
 
     mod = imp.load_source('mowfile', file_path)
-    
+
     # revert sys.path
     sys.path.pop(0)
     
