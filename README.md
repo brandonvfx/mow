@@ -1,8 +1,10 @@
 # Mow
+[![Build Status](https://secure.travis-ci.org/brandonvfx/mow.png?branch=master)](http://travis-ci.org/brandonvfx/mow)
 
 ## Overview
 
 **Mow** is a lightweight Makefile/Rakefile alternative. It allows developers to turn python functions into a command line tools.
+
 
 ##Example
 
