@@ -9,7 +9,7 @@ import argparse
 import traceback
 
 __all__ = ['task']
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
