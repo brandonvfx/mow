@@ -51,7 +51,7 @@ def loadMowfile(path=os.getcwd()):
         #end if 
     # end for
     if not file_path:
-        raise RuntimeError
+        raise RuntimeError()
     # end if 
 
     # load Mowfile
@@ -80,7 +80,9 @@ def loadMowPath(paths=os.getenv('MOW_PATH')):
     __logger.debug('Load paths: %s', paths)
     for path in reversed(paths):
         path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
-        loadMowfile(path)
+        if os.path.exists(path):
+            loadMowfile(path)
+        # end if
     # end for
 # end def findMowFiles
 
