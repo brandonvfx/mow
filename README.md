@@ -31,6 +31,10 @@ Mowfiles are where tasks are defined or loaded. The mowfile must have one of the
 
 By default **mow** will search the current directory for the Mowfile but the -C/--directory option can be used to specify another location.
 
+Multiple mowfiles can also be automatically loaded using the environment variable MOW_PATH. MOW_PATH should be a list of directories to search for the mowfile names listed above.
+
+**Note:** $HOME/.mow will always be added as the first item in the MOW_PATH.
+
 	
 ## Built-in tasks
 

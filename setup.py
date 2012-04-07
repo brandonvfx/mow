@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name='Mow',
-    version='0.1.10',
+    version='0.2.0',
     author='Brandon Ashworth',
     author_email='brandon@brandonashworth.com',
     py_modules=['mow'],
@@ -17,6 +17,7 @@ setup(
     url='https://github.com/brandonvfx/mow',
     license='LICENSE.txt',
     description='Simple tool/framework for automating tasks.',
-    long_description='',
+    long_description='Mow is a lightweight Makefile/Rakefile alternative. '\
+                     'It allows developers to turn python functions into a command line tools',
     install_requires=['argparse'],
 )

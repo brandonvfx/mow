@@ -3,13 +3,14 @@ import os
 import imp 
 import sys
 import glob
+import uuid
 import inspect
 import logging
 import argparse
 import traceback
 
 __all__ = ['task']
-__version__ = '0.1.10'
+__version__ = (0, 2, 0)
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
@@ -39,7 +40,7 @@ def loadMowfile(path=os.getcwd()):
     Loads a the first Mowfile it finds in a given path. Default path is the 
     current working directory.
     """
-
+    __logger.debug('Load Mowfile: %s', path)
     file_path = None
     for mowfile in MOW_FILE_NAMES:
         tmp_path = os.path.join(os.path.abspath(path), mowfile)
@@ -55,36 +56,31 @@ def loadMowfile(path=os.getcwd()):
 
     # load Mowfile
     # update the sys.path just in case there are relative imports.
-    dir = os.path.dirname(file_path)
-    sys.path.insert(0, dir)
-
-    mod = imp.load_source('mowfile', file_path)
-
+    sys.path.insert(0, os.path.dirname(file_path))
+    mod = imp.load_source(str(uuid.uuid1()), file_path)
     # revert sys.path
     sys.path.pop(0)
-    
+    __logger.debug('Mowfile loaded as: %s', mod.__name__)
     # mainly for testing.
-    __logger.debug('Mowfile loaded.')
     return mod
 # end loadMowfile    
         
 
-# TODO:
-# This is a feature I have to decide if I want to turn on. 
-# It is on the same lines as .rake files.
-def findMowFiles(paths=os.getenv('MOW_PATH', '')):
+def loadMowPath(paths=os.getenv('MOW_PATH')):
     """
-    Finds all .mow files in the MOW_PATH and load them.
+    Find and load the  Mowfiles in the MOW_PATH.
     """
-    paths = paths.split(os.path.pathsep)
-    paths.insert(0, os.getcwd())
+    __logger.debug('Load MOW_PATH: %s', paths)
+    if paths:
+        paths = paths.split(os.pathsep)
+        paths.insert(0, '~/.mow')
+    else:
+        paths = ['~/.mow']
+    # end if
+    __logger.debug('Load paths: %s', paths)
     for path in reversed(paths):
         path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
-        files = glob.glob(os.path.join(path, '*.mow'))
-        for file in files:
-            # TODO: update to the mowfile style.
-            exec(open(file).read()) # I hate this line
-        # end for
+        loadMowfile(path)
     # end for
 # end def findMowFiles
 
@@ -122,7 +118,7 @@ def task(name=None, author=None, version=(0,1,0), usage='%prog %name'):
         # store for quick lookup.
         _tasks[func._name] = func
         __logger.debug("Added function '%s:%s' as task '%s'", 
-                       func.__code__.co_filename, func.__name__, name)
+                       func.__code__.co_filename, func.__name__, func._name)
         return func
     # end def wrapper
     return wrapper
@@ -164,13 +160,15 @@ def main(cmd_args=sys.argv[1:]):
     main()
     main function for loading a Mowfile and executing a task.
     """
-    parser = argparse.ArgumentParser(description='Mow')
+    description = "Mow is a lightweight Makefile/Rakefile alternative. " + \
+        "It allows developers to turn python functions into a command line tools"
+
+    parser = argparse.ArgumentParser(description=description, epilog="Mow - v%d.%d.%d" % __version__, prog='mow')
     parser.add_argument('task', help='Task name')
     parser.add_argument('-v', dest='verbose', action='count', default=0, 
                         help = 'Prints outs more info. -v = info, -vv = debug')
     parser.add_argument('-C', '--directory', default=os.getcwd(),
-                        help = 'Directory to find the Mowfile. Default: Current di\
-rectory.')
+                        help = 'Directory to find the Mowfile. Default: Current directory.')
 
     # parse the args the are defined.
     known_args, unknown_args = parser.parse_known_args(cmd_args)
@@ -185,6 +183,7 @@ rectory.')
     # end if
 
     try:
+        loadMowPath()
         loadMowfile(known_args.directory)
     except RuntimeError as exp:
         # raised if not file was found
@@ -278,8 +277,8 @@ def print_task_help(task_name, extended=False):
 print_task_help.__internal = True
 print_task_help._name = 'help'
 print_task_help._author = 'brandonvfx'
-print_task_help._version = (0,1,0)
-print_task_help._usage = 'mow help task'
+print_task_help._version = (0,1,1)
+print_task_help._usage = 'mow help task [--extended]'
 print_task_help._description = print_task_help.__doc__ or ''
 __internal_tasks['help'] = print_task_help
     
