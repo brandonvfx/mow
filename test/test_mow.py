@@ -171,6 +171,11 @@ class TestParseArgs(unittest.TestCase):
         args = ['arg1', '--test=1']
         self.assertEquals((['arg1'], {'test': '1'}), mow.parseArgs(args))
     # end def test_kwargs
+
+    def test_kwargs_multi(self):
+        args = ['arg1', '--test=1', '--test=2', '--test=3']
+        self.assertEquals((['arg1'], {'test': ['1', '2', '3']}), mow.parseArgs(args))
+    # end def test_kwargs
         
     def test_kwargs_flag(self):
         args = ['arg1', '--test=1', '--dry-run']

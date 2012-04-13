@@ -9,8 +9,8 @@ import logging
 import argparse
 import traceback
 
-__all__ = ['task']
-__version__ = (0, 2, 0)
+__all__ = ['task', 'logger']
+__version__ = (0, 3, 0)
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
@@ -66,24 +66,25 @@ def loadMowfile(path=os.getcwd()):
 # end loadMowfile    
         
 
-def loadMowPath(paths=os.getenv('MOW_PATH')):
+def loadMowPath(paths):
     """
     Find and load the  Mowfiles in the MOW_PATH.
     """
-    __logger.debug('Load MOW_PATH: %s', paths)
-    if paths:
-        paths = paths.split(os.pathsep)
-        paths.insert(0, '~/.mow')
-    else:
-        paths = ['~/.mow']
-    # end if
     __logger.debug('Load paths: %s', paths)
     for path in reversed(paths):
         path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
+        mods = []
         if os.path.exists(path):
-            loadMowfile(path)
+            try:
+                mods.append(loadMowfile(path))
+            except RuntimeError:
+                pass
+            # end try
         # end if
     # end for
+    if not mods:
+        raise RuntimeError
+    # end if
 # end def findMowFiles
 
 def task(name=None, author=None, version=(0,1,0), usage='%prog %name'):
@@ -147,6 +148,12 @@ def parseArgs(args):
             key = key.replace('-', '_')
             if not value:
                 func_kwargs[key] = True
+            elif key in func_kwargs:
+                if not isinstance(func_kwargs[key], list):
+                    first_value = func_kwargs.pop(key)
+                    func_kwargs[key] = [first_value]
+                # end if
+                func_kwargs[key].append(value)
             else:
                 func_kwargs[key] = value
             # end if
@@ -184,12 +191,16 @@ def main(cmd_args=sys.argv[1:]):
         logger.setLevel(logging.DEBUG)
     # end if
 
+    load_path = [known_args.directory, '~/.mow']
+    __logger.debug('Load MOW_PATH: %s', os.getenv('MOW_PATH'))
+    mow_path_paths = os.getenv('MOW_PATH', '').split(os.pathsep)
+    load_path.extend(mow_path_paths)
+
     try:
-        loadMowPath()
-        loadMowfile(known_args.directory)
+        loadMowPath(load_path)
     except RuntimeError as exp:
         # raised if not file was found
-        msg = "Could not find Mowfile in '%s'.\nValid filenames: " % (known_args.directory) + \
+        msg = "Could not find any Mowfiles in '%s'.\nValid filenames: " % (os.pathsep.join(load_path)) + \
               ', '.join(MOW_FILE_NAMES)
         __logger.error(msg)
         return 1
