@@ -186,10 +186,12 @@ class TestParseArgs(unittest.TestCase):
 # end class TestParseArgs
 
 class TestMain(unittest.TestCase):
-    def test_missing_Mowfile(self):
-        args = ['list', '-C', tempfile.tempdir]
-        self.assertEquals(1, mow.main(args))
-    # def main test_argparse
+    # TODO: come up with a good way to do this test, now that mow
+    #       searches a list of paths.
+    # def test_missing_Mowfile(self):
+    #     args = ['list', '-C', tempfile.tempdir]
+    #     self.assertEquals(1, mow.main(args))
+    # # def main test_argparse
         
     def test_bad_Mowfile(self):
         dirname = tempfile.mkdtemp()
