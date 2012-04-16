@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name='Mow',
-    version='0.3.0',
+    version='0.3.1',
     author='Brandon Ashworth',
     author_email='brandon@brandonashworth.com',
     py_modules=['mow'],

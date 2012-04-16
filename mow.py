@@ -10,7 +10,7 @@ import argparse
 import traceback
 
 __all__ = ['task', 'logger']
-__version__ = (0, 3, 0)
+__version__ = (0, 3, 1)
 
 MOW_FILE_NAMES = ('mowfile', 'Mowfile', 'mowfile.py' , 'Mowfile.py', )
 
@@ -71,14 +71,14 @@ def loadMowPath(paths):
     Find and load the  Mowfiles in the MOW_PATH.
     """
     __logger.debug('Load paths: %s', paths)
+    mods = []
     for path in reversed(paths):
         path = os.path.abspath(os.path.expanduser(os.path.expandvars(path)))
-        mods = []
         if os.path.exists(path):
             try:
                 mods.append(loadMowfile(path))
             except RuntimeError:
-                pass
+                continue
             # end try
         # end if
     # end for
