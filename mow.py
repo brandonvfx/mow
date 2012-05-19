@@ -32,7 +32,6 @@ try:
     logger = __logger.getChild('task')
 except AttributeError: 
     logger = logging.getLogger("Mow.task")
-# end try
 
 def loadMowfile(path=os.getcwd()):
     """
@@ -48,11 +47,9 @@ def loadMowfile(path=os.getcwd()):
             file_path = tmp_path
             __logger.debug('Found Mowfile: %s', file_path)
             break
-        #end if 
-    # end for
+
     if not file_path:
         raise RuntimeError()
-    # end if 
 
     # load Mowfile
     # update the sys.path just in case there are relative imports.
@@ -62,8 +59,7 @@ def loadMowfile(path=os.getcwd()):
     sys.path.pop(0)
     __logger.debug('Mowfile loaded as: %s', mod.__name__)
     # mainly for testing.
-    return mod
-# end loadMowfile    
+    return mod  
         
 
 def loadMowPath(paths):
@@ -79,13 +75,10 @@ def loadMowPath(paths):
                 mods.append(loadMowfile(path))
             except RuntimeError:
                 continue
-            # end try
-        # end if
-    # end for
+
     if not mods:
         raise RuntimeError
-    # end if
-# end def findMowFiles
+        
 
 def task(name=None, author=None, version=(0,1,0), usage='%prog %name'):
     """
@@ -112,20 +105,16 @@ def task(name=None, author=None, version=(0,1,0), usage='%prog %name'):
 
         if func._name in __internal_tasks:
             raise RuntimeError("'%s' is the name of a built-in task, please rename your task" % (func._name))
-        # end if
         
         if func._name in _tasks:
             __logger.warn("Task '%s' replaces another task with the same name" %(func._name))
-        # end if
 
         # store for quick lookup.
         _tasks[func._name] = func
         __logger.debug("Added function '%s:%s' as task '%s'", 
                        func.__code__.co_filename, func.__name__, func._name)
         return func
-    # end def wrapper
     return wrapper
-# end def task
 
 #
 # Commandline 
@@ -152,17 +141,14 @@ def parseArgs(args):
                 if not isinstance(func_kwargs[key], list):
                     first_value = func_kwargs.pop(key)
                     func_kwargs[key] = [first_value]
-                # end if
                 func_kwargs[key].append(value)
             else:
                 func_kwargs[key] = value
-            # end if
         else:
             func_args.append(arg)
-        # end if
-    # end for
+            
     return func_args, func_kwargs
-# end def parseArgs
+
 
 def main(cmd_args=sys.argv[1:]):
     """
@@ -189,7 +175,6 @@ def main(cmd_args=sys.argv[1:]):
     elif known_args.verbose == 2:
         __logger.setLevel(logging.DEBUG)
         logger.setLevel(logging.DEBUG)
-    # end if
 
     load_path = [known_args.directory, '~/.mow']
     __logger.debug('Load MOW_PATH: %s', os.getenv('MOW_PATH'))
@@ -207,7 +192,6 @@ def main(cmd_args=sys.argv[1:]):
     except Exception as exp:
         __logger.exception('Error Loading Mowfile:')
         return 1
-    # end try
 
     task = __internal_tasks.get(known_args.task) or _tasks.get(known_args.task)
     if not task:
@@ -223,10 +207,6 @@ def main(cmd_args=sys.argv[1:]):
             __logger.exception('Task Error:')
             print('For help type: mow help %s' % known_args.task)
             return 1
-        # end if
-    # end if
-# end def main
-
 
 #
 # Tasks
@@ -244,19 +224,15 @@ def list_tasks(namespace=None):
         for task_name in sorted(__internal_tasks):
             task = __internal_tasks[task_name]
             print('%-25s: %s' % (task_name, task._description.strip()))
-        # end def for
-    # end if
     print('\nLoaded Tasks:')
     print('-'*75)
     for task_name in sorted(_tasks):
         if namespace and not task_name.startswith(namespace+":"):
             continue
-        # end if
         task = _tasks[task_name]
         print('%-25s: %s' % (task_name, task._description.strip()))
-    # end def for
     print('-'*75)
-# end def list_tasks
+
 list_tasks.__internal = True
 list_tasks._name = 'list'
 list_tasks._author = 'brandonvfx'
@@ -273,7 +249,7 @@ def print_task_help(task_name, extended=False):
     if task:
         if getattr(task, '__internal', False):
             print('Built-in Task')
-        # end if
+            
         print('Name: %s' % (task._name))
         print('Usage:\n    %s' % (task._usage))
         print('Description: %s' % (task._description.strip()))
@@ -282,11 +258,10 @@ def print_task_help(task_name, extended=False):
             print('Version: %d.%d.%d' % (task._version))
             print('File: %s:%d' % (task.__code__.co_filename, task.__code__.co_firstlineno))
             print('Function: %s' % (task.__name__))
-        # end if
         return
-    # end if
+        
     print('Task not found: %s' % (task_name))
-# end def print_task_help
+
 print_task_help.__internal = True
 print_task_help._name = 'help'
 print_task_help._author = 'brandonvfx'
